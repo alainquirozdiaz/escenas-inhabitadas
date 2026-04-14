@@ -1,2 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Novela Visual</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #game {
+      width: 600px;
+      padding: 20px;
+      background: #222;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+    button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      background: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #666;
+    }
+    #youtube-link {
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+      cursor: pointer;
+      color: #00aaff;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
 
-tesst
+<div id="game">
+  <p id="text"></p>
+  <div id="choices"></div>
+  <div id="youtube-link" onclick="goToYoutube()">Ir a YouTube</div>
+</div>
+
+<script>
+  const story = {
+    start: {
+      text: "Despiertas en un bosque oscuro... ¿Qué haces?",
+      choices: [
+        { text: "Explorar", next: "explore" },
+        { text: "Quedarte quieto", next: "stay" }
+      ]
+    },
+    explore: {
+      text: "Caminas y encuentras una cabaña misteriosa.",
+      choices: [
+        { text: "Entrar", next: "cabin" },
+        { text: "Regresar", next: "start" }
+      ]
+    },
+    stay: {
+      text: "Te quedas quieto... algo te observa en la oscuridad.",
+      choices: [
+        { text: "Correr", next: "explore" },
+        { text: "Gritar", next: "end_bad" }
+      ]
+    },
+    cabin: {
+      text: "Dentro hay comida y refugio. Has sobrevivido 🎉",
+      choices: [],
+      ending: true
+    },
+    end_bad: {
+      text: "Una criatura aparece... fin del juego 💀",
+      choices: [],
+      ending: true
+    }
+  };
+
+  function renderScene(sceneKey) {
+    const scene = story[sceneKey];
+    document.getElementById("text").innerText = scene.text;
+
+    const choicesDiv = document.getElementById("choices");
+    choicesDiv.innerHTML = "";
+
+    if (scene.choices.length > 0) {
+      scene.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.innerText = choice.text;
+        btn.onclick = () => renderScene(choice.next);
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    if (scene.ending) {
+      document.getElementById("youtube-link").style.display = "block";
+    } else {
+      document.getElementById("youtube-link").style.display = "none";
+    }
+  }
+
+  function goToYoutube() {
+    window.location.href = "https://www.youtube.com";
+  }
+
+  renderScene("start");
+</script>
+
+</body>
+</html>
