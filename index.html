@@ -9,6 +9,7 @@
     margin: 0;
     overflow: hidden;
     background: black;
+    font-family: Arial, sans-serif;
   }
 
   video {
@@ -16,19 +17,6 @@
     width: 100vw;
     height: 100vh;
     object-fit: cover;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: opacity 1s ease; /* 🔥 duración del crossfade */
-  }
-
-  video.active {
-    opacity: 1;
-    z-index: 2;
-  }
-
-  video.background {
-    z-index: 1;
   }
 
   .overlay {
@@ -39,122 +27,177 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    pointer-events: none;
   }
 
   .buttons {
     display: none;
     gap: 20px;
+    pointer-events: all;
   }
 
-  button {
-    padding: 15px 30px;
+  /* BOTONES DE OPCIONES */
+  .buttons button {
+    padding: 16px 32px;
     font-size: 18px;
-    border-radius: 10px;
-    border: none;
+    border-radius: 14px;
+    border: 2px solid white;
     cursor: pointer;
-    background: rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.75);
     color: white;
-    backdrop-filter: blur(10px);
-    transition: 0.3s;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.6);
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    transition: 0.25s;
   }
 
-  button:hover {
+  .buttons button:hover {
     background: white;
     color: black;
+    transform: scale(1.08);
   }
 
+  /* 🔥 BOTÓN FINAL (oculto correctamente) */
   #finalButton {
     display: none;
     margin-top: 20px;
+    pointer-events: all;
+
+    padding: 16px 32px;
+    font-size: 18px;
+    border-radius: 14px;
+    border: 2px solid white;
+    cursor: pointer;
+
+    background: rgba(0,0,0,0.75);
+    color: white;
+
+    box-shadow: 0 6px 25px rgba(0,0,0,0.6);
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+
+    align-items: center;
+    gap: 10px;
+
+    transition: 0.25s;
   }
 
+  #finalButton:hover {
+    background: white;
+    color: black;
+    transform: scale(1.08);
+  }
+
+  button {
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,0.2);
+    color: white;
+  }
+
+  #startScreen {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+  }
+
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 3;
+  }
 </style>
 </head>
 
 <body>
 
-<!-- 🎬 VIDEOS -->
-<video id="intro" class="active" preload="auto">
-  <source src="Rough_Intro(Todo).mp4" type="video/mp4">
-</video>
+<video id="video" muted playsinline></video>
 
-<video id="v1" preload="auto">
-  <source src="Rough_Agité.mp4" type="video/mp4">
-</video>
-
-<video id="v2" preload="auto">
-  <source src="Rough_OFicinaCentral.mp4" type="video/mp4">
-</video>
-
-<video id="v3" preload="auto">
-  <source src="Rough_PequeñoTeatro.mp4" type="video/mp4">
-</video>
+<div id="startScreen">
+  <button onclick="start()">Iniciar</button>
+</div>
 
 <div class="overlay">
-  <div class="buttons" id="buttons">
-    <button onclick="play('v1')">Agité</button>
-    <button onclick="play('v2')">Oficina</button>
-    <button onclick="play('v3')">Teatro</button>
+  <div class="buttons" id="options">
+    <button onclick="playVideo('Rough_Agite.mp4')">Agité</button>
+    <button onclick="playVideo('Rough_OFicinaCentral.mp4')">Oficina</button>
+    <button onclick="playVideo('Rough_PequenoTeatro.mp4')">Teatro</button>
   </div>
 
-  <button id="finalButton" onclick="goToLink()">Continuar</button>
+  <!-- 🔥 SOLO APARECE AL FINAL -->
+  <button id="finalButton" onclick="goToLink()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.75 2h2.25c.2 1.9 1.7 3.4 3.6 3.6v2.3c-1.3-.1-2.5-.5-3.6-1.2v7.4c0 3.2-2.6 5.8-5.8 5.8s-5.8-2.6-5.8-5.8 2.6-5.8 5.8-5.8c.3 0 .6 0 .9.1v2.4c-.3-.1-.6-.2-.9-.2-1.9 0-3.4 1.5-3.4 3.4s1.5 3.4 3.4 3.4 3.4-1.5 3.4-3.4V2z"/>
+    </svg>
+    Tik Tok
+  </button>
+</div>
+
+<div id="controls">
+  <button onclick="skip()">⏭</button>
 </div>
 
 <script>
-  const videos = {
-    intro: document.getElementById("intro"),
-    v1: document.getElementById("v1"),
-    v2: document.getElementById("v2"),
-    v3: document.getElementById("v3")
-  };
-
-  const buttons = document.getElementById("buttons");
+  const video = document.getElementById("video");
+  const options = document.getElementById("options");
   const finalButton = document.getElementById("finalButton");
+  const startScreen = document.getElementById("startScreen");
 
-  let current = videos.intro;
+  let isIntro = true;
 
-  // ▶️ iniciar intro
-  current.play();
-
-  current.onended = () => {
-    buttons.style.display = "flex";
-  };
-
-  function crossfade(toVideo) {
-    const next = videos[toVideo];
-
-    // preparar siguiente video
-    next.currentTime = 0;
-    next.classList.add("active");
-    next.classList.add("background");
-    next.play();
-
-    // 🔥 crossfade
-    current.classList.remove("active");
-
-    // limpiar después del fade
-    setTimeout(() => {
-      current.pause();
-      current.classList.remove("background");
-      current = next;
-    }, 1000); // igual al CSS transition
-
-    current = next;
+  function start() {
+    startScreen.style.display = "none";
+    loadVideo("Rough_Intro(Todo).mp4", true);
   }
 
-  function play(id) {
-    buttons.style.display = "none";
-    finalButton.style.display = "none";
+  function loadVideo(src, intro = false) {
+    isIntro = intro;
 
-    crossfade(id);
+    video.pause();
+    video.src = src;
+    video.load();
 
-    videos[id].onended = () => {
-      finalButton.style.display = "block";
+    video.onloadeddata = () => {
+      video.currentTime = 0;
+      video.play().catch(() => {});
     };
   }
 
+  video.addEventListener("ended", () => {
+    if (isIntro) {
+      options.style.display = "flex";
+    } else {
+      finalButton.style.display = "flex"; // 🔥 aparece aquí
+    }
+  });
+
+  function playVideo(src) {
+    options.style.display = "none";
+    finalButton.style.display = "none";
+
+    loadVideo(src, false);
+  }
+
+  function skip() {
+    video.pause();
+
+    if (isIntro) {
+      options.style.display = "flex";
+      isIntro = false;
+    } else {
+      finalButton.style.display = "flex";
+    }
+  }
+
   function goToLink() {
-    window.location.href = "https://www.google.com";
+    window.location.href = "https://www.tiktok.com/@escenas_inhabitadas?_r=1&_t=ZS-95hnxZTzgVZ";
   }
 </script>
 
