@@ -2,120 +2,93 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Novela Visual</title>
+  <title>Video Interactivo</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
+      margin: 0;
+      background: black;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
     }
-    #game {
-      width: 600px;
-      padding: 20px;
-      background: #222;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #000;
+
+    video {
+      max-width: 90%;
+      max-height: 80%;
+      background: black;
     }
-    button {
-      display: block;
-      margin: 10px 0;
-      padding: 10px;
-      width: 100%;
-      background: #444;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background: #666;
-    }
-    #youtube-link {
+
+    .buttons {
       margin-top: 20px;
-      text-align: center;
       display: none;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
       cursor: pointer;
-      color: #00aaff;
-      text-decoration: underline;
+      border: none;
+      border-radius: 5px;
+      background: #ffffff;
+    }
+
+    #finalButton {
+      display: none;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-<div id="game">
-  <p id="text"></p>
-  <div id="choices"></div>
-  <div id="youtube-link" onclick="goToYoutube()">Ir a YouTube</div>
-</div>
+  <video id="videoPlayer" controls autoplay>
+    <source src="Rough_Intro(Todo).mp4" type="video/mp4">
+    Tu navegador no soporta video.
+  </video>
 
-<script>
-  const story = {
-    start: {
-      text: "Despiertas en un bosque oscuro... ¿Qué haces?",
-      choices: [
-        { text: "Explorar", next: "explore" },
-        { text: "Quedarte quieto", next: "stay" }
-      ]
-    },
-    explore: {
-      text: "Caminas y encuentras una cabaña misteriosa.",
-      choices: [
-        { text: "Entrar", next: "cabin" },
-        { text: "Regresar", next: "start" }
-      ]
-    },
-    stay: {
-      text: "Te quedas quieto... algo te observa en la oscuridad.",
-      choices: [
-        { text: "Correr", next: "explore" },
-        { text: "Gritar", next: "end_bad" }
-      ]
-    },
-    cabin: {
-      text: "Dentro hay comida y refugio. Has sobrevivido 🎉",
-      choices: [],
-      ending: true
-    },
-    end_bad: {
-      text: "Una criatura aparece... fin del juego 💀",
-      choices: [],
-      ending: true
-    }
-  };
+  <div class="buttons" id="choiceButtons">
+    <button onclick="playVideo('Rough_Agité.mp4')">Opción 1</button>
+    <button onclick="playVideo('Rough_OFicinaCentral.mp4')">Opción 2</button>
+    <button onclick="playVideo('Rough_PequeñoTeatro.mp4')">Opción 3</button>
+  </div>
 
-  function renderScene(sceneKey) {
-    const scene = story[sceneKey];
-    document.getElementById("text").innerText = scene.text;
+  <button id="finalButton" onclick="goToLink()">
+    Ir al siguiente paso
+  </button>
 
-    const choicesDiv = document.getElementById("choices");
-    choicesDiv.innerHTML = "";
+  <script>
+    const video = document.getElementById("videoPlayer");
+    const buttons = document.getElementById("choiceButtons");
+    const finalButton = document.getElementById("finalButton");
 
-    if (scene.choices.length > 0) {
-      scene.choices.forEach(choice => {
-        const btn = document.createElement("button");
-        btn.innerText = choice.text;
-        btn.onclick = () => renderScene(choice.next);
-        choicesDiv.appendChild(btn);
-      });
+    let introFinished = false;
+
+    video.onended = () => {
+      if (!introFinished) {
+        // Terminó el intro
+        introFinished = true;
+        buttons.style.display = "flex";
+      } else {
+        // Terminó un video elegido
+        finalButton.style.display = "block";
+      }
+    };
+
+    function playVideo(src) {
+      buttons.style.display = "none";
+      finalButton.style.display = "none";
+
+      video.src = src;
+      video.play();
     }
 
-    if (scene.ending) {
-      document.getElementById("youtube-link").style.display = "block";
-    } else {
-      document.getElementById("youtube-link").style.display = "none";
+    function goToLink() {
+      window.location.href = "https://www.google.com"; // cámbialo si quieres
     }
-  }
-
-  function goToYoutube() {
-    window.location.href = "https://www.youtube.com";
-  }
-
-  renderScene("start");
-</script>
+  </script>
 
 </body>
 </html>
