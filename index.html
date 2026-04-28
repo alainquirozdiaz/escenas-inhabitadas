@@ -1,94 +1,162 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Video Interactivo</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<title>Video Interactivo</title>
 
-    video {
-      max-width: 90%;
-      max-height: 80%;
-      background: black;
-    }
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+  }
 
-    .buttons {
-      margin-top: 20px;
-      display: none;
-      gap: 10px;
-    }
+  video {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 1s ease; /* 🔥 duración del crossfade */
+  }
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background: #ffffff;
-    }
+  video.active {
+    opacity: 1;
+    z-index: 2;
+  }
 
-    #finalButton {
-      display: none;
-      margin-top: 20px;
-    }
-  </style>
+  video.background {
+    z-index: 1;
+  }
+
+  .overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .buttons {
+    display: none;
+    gap: 20px;
+  }
+
+  button {
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: white;
+    color: black;
+  }
+
+  #finalButton {
+    display: none;
+    margin-top: 20px;
+  }
+
+</style>
 </head>
+
 <body>
 
-  <video id="videoPlayer" controls autoplay>
-    <source src="Rough_Intro(Todo).mp4" type="video/mp4">
-    Tu navegador no soporta video.
-  </video>
+<!-- 🎬 VIDEOS -->
+<video id="intro" class="active" preload="auto">
+  <source src="Rough_Intro(Todo).mp4" type="video/mp4">
+</video>
 
-  <div class="buttons" id="choiceButtons">
-    <button onclick="playVideo('Rough_Agité.mp4')">Opción 1</button>
-    <button onclick="playVideo('Rough_OFicinaCentral.mp4')">Opción 2</button>
-    <button onclick="playVideo('Rough_PequeñoTeatro.mp4')">Opción 3</button>
+<video id="v1" preload="auto">
+  <source src="Rough_Agité.mp4" type="video/mp4">
+</video>
+
+<video id="v2" preload="auto">
+  <source src="Rough_OFicinaCentral.mp4" type="video/mp4">
+</video>
+
+<video id="v3" preload="auto">
+  <source src="Rough_PequeñoTeatro.mp4" type="video/mp4">
+</video>
+
+<div class="overlay">
+  <div class="buttons" id="buttons">
+    <button onclick="play('v1')">Agité</button>
+    <button onclick="play('v2')">Oficina</button>
+    <button onclick="play('v3')">Teatro</button>
   </div>
 
-  <button id="finalButton" onclick="goToLink()">
-    Ir al siguiente paso
-  </button>
+  <button id="finalButton" onclick="goToLink()">Continuar</button>
+</div>
 
-  <script>
-    const video = document.getElementById("videoPlayer");
-    const buttons = document.getElementById("choiceButtons");
-    const finalButton = document.getElementById("finalButton");
+<script>
+  const videos = {
+    intro: document.getElementById("intro"),
+    v1: document.getElementById("v1"),
+    v2: document.getElementById("v2"),
+    v3: document.getElementById("v3")
+  };
 
-    let introFinished = false;
+  const buttons = document.getElementById("buttons");
+  const finalButton = document.getElementById("finalButton");
 
-    video.onended = () => {
-      if (!introFinished) {
-        // Terminó el intro
-        introFinished = true;
-        buttons.style.display = "flex";
-      } else {
-        // Terminó un video elegido
-        finalButton.style.display = "block";
-      }
+  let current = videos.intro;
+
+  // ▶️ iniciar intro
+  current.play();
+
+  current.onended = () => {
+    buttons.style.display = "flex";
+  };
+
+  function crossfade(toVideo) {
+    const next = videos[toVideo];
+
+    // preparar siguiente video
+    next.currentTime = 0;
+    next.classList.add("active");
+    next.classList.add("background");
+    next.play();
+
+    // 🔥 crossfade
+    current.classList.remove("active");
+
+    // limpiar después del fade
+    setTimeout(() => {
+      current.pause();
+      current.classList.remove("background");
+      current = next;
+    }, 1000); // igual al CSS transition
+
+    current = next;
+  }
+
+  function play(id) {
+    buttons.style.display = "none";
+    finalButton.style.display = "none";
+
+    crossfade(id);
+
+    videos[id].onended = () => {
+      finalButton.style.display = "block";
     };
+  }
 
-    function playVideo(src) {
-      buttons.style.display = "none";
-      finalButton.style.display = "none";
-
-      video.src = src;
-      video.play();
-    }
-
-    function goToLink() {
-      window.location.href = "https://www.google.com"; // cámbialo si quieres
-    }
-  </script>
+  function goToLink() {
+    window.location.href = "https://www.google.com";
+  }
+</script>
 
 </body>
 </html>
